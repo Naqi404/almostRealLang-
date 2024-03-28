@@ -1,0 +1,51 @@
+from SoundLib import *
+
+def main():
+  blockingPlay(sineWave(500,12000,2))
+  blockingPlay(squareWave(500,12000,2))
+  sound = makeSound(getMediaPath("airplane.wav"))
+  airplaneRepeated = copyNumberTimes(sound,5)
+  explore(echo(airplaneRepeated,5000))
+
+def echo(sound,delay):
+  canvas = duplicateSound(sound)
+  for index in range(delay,getLength(sound)):
+    echoSample = 0.6*getSampleValueAt(canvas, index - delay)
+    comboSample = getSampleValueAt(sound,index) + echoSample
+    setSampleValueAt(canvas,index,comboSample)
+  return(canvas)
+
+def sineWave(freq,amp,sec):
+  canvas = makeEmptySoundBySeconds(sec)
+  samplingRate = getSamplingRate(canvas)
+  interval = 1.0/freq
+  samplesPerCycle = interval * samplingRate
+  maxCycle = 2 * pi
+  for pos in range(0,getLength(canvas)):
+    rawSample = sin((pos/samplesPerCycle) * maxCycle)
+    sampleValue = int(amp * rawSample)
+    setSampleValueAt(canvas,pos,sampleValue)
+  return(canvas)
+
+def squareWave(freq,amp,sec):
+  canvas = makeEmptySoundBySeconds(sec)
+  samplingRate = getSamplingRate(canvas)
+  interval = 1.0/freq
+  samplesPerCycle = interval * samplingRate
+  samplesPerHalfCycle = int(samplesPerCycle/2)
+  sampleValue = amp
+  s = 1
+  i = 1
+  for s in range(0,getLength(canvas)):
+    if (i > samplesPerHalfCycle):
+      sampleValue = sampleValue * -1
+      i = 0
+    setSampleValueAt(canvas,s,sampleValue)
+    i = i + 1
+  return(canvas)
+
+def copyNumberTimes(sound,number):
+  canvas = makeEmptySound(getLength(sound)*(number+1))
+  for times in range(0,number+1):
+    copy(sound,canvas,times*getLength(sound))
+  return(canvas)
